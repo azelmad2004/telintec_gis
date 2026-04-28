@@ -51,6 +51,7 @@ class EquipementController extends Controller
     {
         $equipement = Equipement::findOrFail($id);
         $equipement->update($request->all());
+        $equipement->load(['zone', 'ports']);
 
         return response()->json($equipement);
     }

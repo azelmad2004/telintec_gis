@@ -6,7 +6,8 @@ import {
   Search, 
   Plus, 
   FileText,
-  Database
+  Database,
+  Settings
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -300,6 +301,22 @@ export default function PlanningPage() {
         .action-icon-btn:hover {
           background: #f0f0f0;
           color: #0052CC;
+        }
+
+        @media (max-width: 768px) {
+          .dashboard-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+          }
+          .stat-card {
+            padding: 15px !important;
+          }
+          .stat-card-value {
+            font-size: 24px !important;
+          }
+          .nms-search-bar {
+            max-width: 100% !important;
+          }
         }
       `}} />
     </div>

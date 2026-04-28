@@ -9,8 +9,10 @@ import { Download, Crosshair, Plus, Minus } from 'lucide-react';
 const getMarkerIcon = (type, status) => {
   const colors = {
     'NRO': '#800080',      // Purple
+    'SR': '#00008B',       // Base SR
     'SR_FIBER': '#00008B', // Dark Blue
     'SR_ADSL': '#D2691E',  // Chocolate/Orange
+    'PCO': '#00BFFF',      // Base PCO
     'PCO_FIBER': '#00BFFF',// Deep Sky Blue
     'PC_COPPER': '#8B4513' // Saddle Brown
   };
@@ -42,6 +44,17 @@ function MapFeatures({ onLocationFound }) {
       map.flyTo(e.latlng, 20, { animate: true, duration: 1.5 });
     });
   }, [map, onLocationFound]);
+  return null;
+}
+
+function MapClickHandler({ onMapClick }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!onMapClick) return;
+    const onClick = (e) => onMapClick(e.latlng);
+    map.on('click', onClick);
+    return () => map.off('click', onClick);
+  }, [map, onMapClick]);
   return null;
 }
 
@@ -104,7 +117,7 @@ function OfflineControl() {
   );
 }
 
-export default function MapView({ equipements, onEquipementClick, selectedEquipement }) {
+export default function MapView({ equipements, onEquipementClick, selectedEquipement, onMapClick }) {
   const [userLocation, setUserLocation] = useState(null);
   const position = [32.9348, -5.6697];
   const khenifraBounds = [[32.85, -5.75], [33.02, -5.58]];
@@ -131,22 +144,14 @@ export default function MapView({ equipements, onEquipementClick, selectedEquipe
         <MapFeatures onLocationFound={setUserLocation} />
         <OfflineControl />
         <FlyToSelected />
+        <MapClickHandler onMapClick={onMapClick} />
 
         <TileLayer
-          url="https://mt1.google.com/vt/lyrs=t,h&x={x}&y={y}&z={z}"
-          attribution="&copy; Google Terrain"
-          opacity={0.3}
+          url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+          attribution="&copy; Google Satellite"
+          opacity={1}
           zIndex={5}
           maxNativeZoom={20}
-          maxZoom={22}
-          detectRetina={true}
-        />
-
-        <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
-          attribution="Esri Places"
-          zIndex={10}
-          maxNativeZoom={18}
           maxZoom={22}
           detectRetina={true}
         />

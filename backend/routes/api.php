@@ -29,5 +29,7 @@ Route::group([
     'middleware' => 'auth:api',
 ], function ($router) {
     Route::apiResource('equipements', 'App\Http\Controllers\EquipementController');
+    Route::apiResource('zones', 'App\Http\Controllers\ZoneController');
+    Route::apiResource('ports', 'App\Http\Controllers\PortController');
     Route::post('import-kmz', 'App\Http\Controllers\EquipementController@importKMZ');
 });

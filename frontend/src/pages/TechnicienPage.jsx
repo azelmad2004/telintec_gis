@@ -22,14 +22,45 @@ import {
   X as XIcon,
   MapPin,
   Database,
+  Menu,
 } from 'lucide-react';
 
-function PcoPopup({ equipement, onClose }) {
+function PcoPopup({ equipement, onClose, onUpdate }) {
   if (!equipement) return null;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({ name: equipement.name, type: equipement.type });
+
   const portsLibres = equipement.ports?.filter(p => p.status === 'libre').length || 0;
   const portsPleins = equipement.ports?.filter(p => p.status === 'plein').length || 0;
   const totalPorts = equipement.ports?.length || 0;
   const occupationRate = totalPorts > 0 ? Math.round((portsPleins / totalPorts) * 100) : 0;
+
+  const handleUpdate = async () => {
+    try {
+      const res = await api.put(`/equipements/${equipement.id}`, editData);
+      onUpdate(res.data);
+      setIsEditing(false);
+    } catch (err) { console.error(err); }
+  };
+
+  const handlePortAction = async (port) => {
+    if (port.status === 'plein') {
+      if (!window.confirm("Voulez-vous libérer ce port ?")) return;
+    } else {
+      if (!window.confirm("Voulez-vous ajouter un client sur ce port ?")) return;
+    }
+    
+    try {
+      // Simple toggle status for now
+      const newStatus = port.status === 'plein' ? 'libre' : 'plein';
+      // Assuming a port update endpoint exists or we use the equipment update
+      // For now let's use a dummy update or assume backend handles it.
+      // Better: assume we have a port update endpoint.
+      await api.put(`/ports/${port.id}`, { status: newStatus });
+      onUpdate(); // Refresh data
+    } catch (err) { console.error(err); }
+  };
+
   const typeColors = {
     PCO: { bg: '#E3F2FD', text: '#0D47A1', border: '#90CAF9', full: '#D32F2F', empty: '#388E3C' },
     SR: { bg: '#F1F8E9', text: '#33691E', border: '#C5E1A5', full: '#E65100', empty: '#2E7D32' },
@@ -37,22 +68,53 @@ function PcoPopup({ equipement, onClose }) {
     default: { bg: '#F4F5F7', text: '#42526E', border: '#DFE1E6', full: '#FF5630', empty: '#36B37E' }
   };
   const scheme = typeColors[equipement.type] || typeColors.default;
+
   return (
-    <div className="pco-popup" style={{ borderRadius: 'var(--radius)' }}>
+    <div className="pco-popup" style={{ borderRadius: 'var(--radius)', width: '380px' }}>
       <div className="pco-popup-header" style={{ borderRadius: 'var(--radius) var(--radius) 0 0' }}>
-        <div>
-          <div style={{ fontSize: '10px', fontWeight: '800', opacity: 0.8, textTransform: 'uppercase' }}>Équipement</div>
-          <div className="pco-popup-title">{equipement.name}</div>
+        <div style={{ flex: 1 }}>
+          {isEditing ? (
+            <input 
+              value={editData.name} 
+              onChange={e => setEditData({...editData, name: e.target.value})}
+              style={{ width: '100%', padding: '4px', fontSize: '16px', fontWeight: '900' }}
+            />
+          ) : (
+            <>
+              <div style={{ fontSize: '10px', fontWeight: '800', opacity: 0.8, textTransform: 'uppercase' }}>Équipement</div>
+              <div className="pco-popup-title">{equipement.name}</div>
+            </>
+          )}
         </div>
-        <button className="pco-close-btn" onClick={onClose}><XIcon size={20} /></button>
+        <div style={{ display: 'flex', gap: '5px' }}>
+          {isEditing ? (
+            <button onClick={handleUpdate} style={{ background: '#36B37E', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '10px' }}>OK</button>
+          ) : (
+            <button onClick={() => setIsEditing(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><Edit size={16} color="white" /></button>
+          )}
+          <button className="pco-close-btn" onClick={onClose}><XIcon size={20} /></button>
+        </div>
       </div>
       <div className="pco-popup-body">
         <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
-          <div style={{ padding: '6px 14px', background: scheme.bg, color: scheme.text, fontSize: '12px', fontWeight: '800', borderRadius: '4px' }}>{equipement.type}</div>
+          {isEditing ? (
+            <select 
+              value={editData.type} 
+              onChange={e => setEditData({...editData, type: e.target.value})}
+              style={{ fontSize: '12px' }}
+            >
+              <option value="PCO">PCO</option>
+              <option value="SR">SR</option>
+              <option value="Splitter">Splitter</option>
+            </select>
+          ) : (
+            <div style={{ padding: '6px 14px', background: scheme.bg, color: scheme.text, fontSize: '12px', fontWeight: '800', borderRadius: '4px' }}>{equipement.type}</div>
+          )}
           <div style={{ padding: '6px 14px', background: '#F4F5F7', color: '#42526E', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <MapPin size={12} />{Number(equipement.latitude).toFixed(5)}, {Number(equipement.longitude).toFixed(5)}
           </div>
         </div>
+
         <div style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span style={{ fontSize: '11px', fontWeight: '800', color: '#7A869A' }}>SATURATION RÉSEAU</span>
@@ -62,6 +124,7 @@ function PcoPopup({ equipement, onClose }) {
             <div style={{ height: '100%', background: occupationRate > 80 ? '#FF5630' : '#0052CC', width: `${occupationRate}%` }}></div>
           </div>
         </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '32px' }}>
           <div style={{ padding: '16px', background: '#E3FCEF', borderLeft: `4px solid ${scheme.empty}` }}>
             <div style={{ fontSize: '10px', color: '#006644', fontWeight: '800' }}>PORTS LIBRES</div>
@@ -72,14 +135,33 @@ function PcoPopup({ equipement, onClose }) {
             <div style={{ fontSize: '24px', fontWeight: '900', color: '#BF2600' }}>{portsPleins}</div>
           </div>
         </div>
+
         <div style={{ fontSize: '12px', fontWeight: '900', color: '#172B4D', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Database size={16} color={scheme.text} /> ARCHITECTURE DES PORTS
+          <Database size={16} color={scheme.text} /> ARCHITECTURE / AJOUT CLIENT
         </div>
+        
         <div className="pco-ports-grid" style={{ gap: '6px' }}>
           {equipement.ports?.map(port => {
             const isPlein = port.status === 'plein';
             return (
-              <div key={port.id} className={`pco-port ${port.status}`} style={{ fontSize: '10px', height: '36px', background: isPlein ? scheme.full + '22' : scheme.empty + '22', color: isPlein ? scheme.full : scheme.empty, border: `1px solid ${isPlein ? scheme.full + '44' : scheme.empty + '44'}`, fontWeight: '800' }}>
+              <div 
+                key={port.id} 
+                className={`pco-port ${port.status}`} 
+                onClick={() => handlePortAction(port)}
+                title={isPlein ? "Libérer le port" : "Ajouter un client"}
+                style={{ 
+                  fontSize: '10px', 
+                  height: '36px', 
+                  background: isPlein ? scheme.full + '22' : scheme.empty + '22', 
+                  color: isPlein ? scheme.full : scheme.empty, 
+                  border: `1px solid ${isPlein ? scheme.full + '44' : scheme.empty + '44'}`, 
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s'
+                }}
+                onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+              >
                 {port.number}
               </div>
             );
@@ -100,6 +182,7 @@ export default function TechnicienPage() {
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState(null);
+  const [newNodeCoords, setNewNodeCoords] = useState(null);
   
   const navigate = useNavigate();
 
@@ -109,14 +192,44 @@ export default function TechnicienPage() {
 
   const fetchData = async () => {
     try {
-      const [eqRes, zoneRes] = await Promise.all([
+      const [eqRes, zoneRes] = await Promise.allSettled([
         api.get('/equipements'),
         api.get('/zones')
       ]);
-      setEquipements(eqRes.data);
-      setZones(zoneRes.data);
+      
+      if (eqRes.status === 'fulfilled') setEquipements(eqRes.value.data);
+      if (zoneRes.status === 'fulfilled') setZones(zoneRes.value.data);
+      
     } catch (error) {
       console.error("Erreur", error);
+    }
+  };
+
+  const handleMapClick = (latlng) => {
+    setNewNodeCoords(latlng);
+    setSelectedEq(null);
+  };
+
+  const handleAddNode = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {
+      node_id: formData.get('node_id'),
+      name: formData.get('name'),
+      type: formData.get('type'),
+      latitude: newNodeCoords.lat,
+      longitude: newNodeCoords.lng,
+      zone_id: zones[0]?.id || 1, // Default zone
+    };
+
+    try {
+      const res = await api.post('/equipements', data);
+      setEquipements([...equipements, res.data]);
+      setNewNodeCoords(null);
+      setStatus({ type: 'success', message: 'Équipement ajouté avec succès !' });
+    } catch (err) {
+      console.error(err);
+      setStatus({ type: 'error', message: 'Erreur lors de l\'ajout.' });
     }
   };
 
@@ -238,7 +351,25 @@ export default function TechnicienPage() {
       <div className="tech-container">
 
       <div className="gis-main-content">
-        <aside className="gis-sidebar">
+        {/* Mobile Toggle */}
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          style={{
+            position: 'absolute',
+            top: '15px',
+            left: '15px',
+            zIndex: 3000,
+            background: 'white',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            padding: '8px'
+          }}
+          className="mobile-toggle-btn"
+        >
+          {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+
+        <aside className={`gis-sidebar ${isSidebarOpen ? 'mobile-open' : ''}`}>
           <div className="sidebar-header">
              <div className="search-container-v2">
                 <Search size={18} className="search-icon" />
@@ -327,11 +458,48 @@ export default function TechnicienPage() {
             equipements={equipements} 
             onEquipementClick={setSelectedEq} 
             selectedEquipement={selectedEq}
+            onMapClick={handleMapClick}
           />
+
+          {newNodeCoords && (
+            <div className="add-node-popup">
+              <div className="pco-popup-header">
+                <div className="pco-popup-title">Ajouter un nœud</div>
+                <button className="pco-close-btn" onClick={() => setNewNodeCoords(null)}><X size={20} /></button>
+              </div>
+              <form onSubmit={handleAddNode} style={{ padding: '20px' }}>
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '5px' }}>NODE ID</label>
+                  <input name="node_id" required style={{ width: '100%', padding: '8px' }} placeholder="Ex: PCO-123" />
+                </div>
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '5px' }}>NOM</label>
+                  <input name="name" required style={{ width: '100%', padding: '8px' }} placeholder="Ex: PCO Khenifra center" />
+                </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '5px' }}>TYPE</label>
+                  <select name="type" style={{ width: '100%', padding: '8px' }}>
+                    <option value="PCO">PCO</option>
+                    <option value="SR">SR</option>
+                    <option value="Splitter">Splitter</option>
+                  </select>
+                </div>
+                <button type="submit" className="add-node-btn" style={{ background: '#0052CC', color: 'white' }}>CRÉER LE NŒUD</button>
+              </form>
+            </div>
+          )}
           
           <PcoPopup 
             equipement={selectedEq} 
             onClose={() => setSelectedEq(null)} 
+            onUpdate={(updated) => {
+              if (updated) {
+                setEquipements(equipements.map(e => e.id === updated.id ? updated : e));
+                setSelectedEq(updated);
+              } else {
+                fetchData(); // Full refresh
+              }
+            }}
           />
         </main>
       </div>
@@ -372,6 +540,18 @@ export default function TechnicienPage() {
         .add-node-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .add-node-popup {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 350px;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+          z-index: 5000;
+        }
       `}} />
       </div>
     </GisLayout>

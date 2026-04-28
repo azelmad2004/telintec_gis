@@ -195,11 +195,22 @@ html, body, #root { height: 100%; width: 100%; }
   border-bottom: 1px solid #f0f0f0;
 }
 
+.mobile-toggle-btn {
+  display: none;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+  .gis-toolbar {
+    height: 60px;
+    padding: 0 10px;
+  }
+  
   .toolbar-label { display: none; }
   .toolbar-section { padding: 0 5px; }
   .toolbar-item { padding: 0 10px; }
+  
+  .user-info-header { display: none; } /* Hide user info on small mobile */
   
   .gis-sidebar {
     position: absolute;
@@ -207,7 +218,8 @@ html, body, #root { height: 100%; width: 100%; }
     top: 0;
     bottom: 0;
     transform: translateX(-100%);
-    width: 280px;
+    width: 85%;
+    max-width: 320px;
     box-shadow: 10px 0 25px rgba(0,0,0,0.1);
   }
   
@@ -221,4 +233,16 @@ html, body, #root { height: 100%; width: 100%; }
   
   .stat-card { padding: 15px; }
   .stat-card-value { font-size: 24px; }
+  
+  .tech-container main {
+    padding: 15px !important;
+  }
+  
+  .tech-table-container {
+    overflow-x: auto;
+  }
+  
+  .mobile-toggle-btn {
+    display: block !important;
+  }
 }
