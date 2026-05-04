@@ -1,0 +1,349 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap");
+:root {
+  --primary: #0052cc;
+  --primary-glow: rgba(0, 82, 204, 0.15);
+  --bg-dark: #333333;
+  --bg-toolbar: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-main: #ffffff;
+  --text-primary: #212529;
+  --text-secondary: #495057;
+  --text-white: #333333;
+  --border-color: #e0e0e0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+.tech-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.gis-toolbar {
+  height: 70px;
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 2000;
+}
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 15px;
+  border-right: 1px solid var(--border-color);
+}
+.toolbar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  height: 100%;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+.toolbar-item:hover {
+  background: #f8f9fa;
+  color: var(--primary);
+}
+.toolbar-item.active {
+  color: var(--primary);
+  background: var(--primary-glow);
+  border-bottom: 3px solid var(--primary);
+}
+.toolbar-label {
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+.gis-main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+.gis-sidebar {
+  width: 320px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+  z-index: 1500;
+}
+.sidebar-header {
+  padding: 15px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #555;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+.gis-map-container {
+  flex: 1;
+  position: relative;
+  background: #eee;
+}
+.status-chip {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.status-active {
+  background: #e3fcef;
+  color: #006644;
+}
+.status-inactive {
+  background: #ffebe6;
+  color: #bf2600;
+}
+.status-maintenance {
+  background: #fff0b3;
+  color: #825c00;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 0;
+}
+.stat-card {
+  background: white;
+  padding: 25px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  border-left: 5px solid var(--primary);
+}
+.stat-card-label {
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+.tech-table-container {
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+.tech-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tech-table th {
+  background: #ffffff;
+  padding: 15px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 800;
+  color: #777;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-color);
+}
+.tech-table td {
+  padding: 14px 20px;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.mobile-toggle-btn {
+  display: none;
+}
+@media (max-width: 768px) {
+  .gis-toolbar {
+    height: 60px;
+    padding: 0 10px;
+  }
+  .toolbar-label {
+    display: none;
+  }
+  .toolbar-section {
+    padding: 0 5px;
+  }
+  .toolbar-item {
+    padding: 0 10px;
+  }
+  .user-info-header {
+    display: none;
+  }
+  .gis-sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    width: 85%;
+    max-width: 320px;
+    box-shadow: 10px 0 25px rgba(0, 0, 0, 0.1);
+    z-index: 5000;
+    background: #ffffff;
+  }
+  .gis-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-card {
+    padding: 15px;
+  }
+  .stat-card-value {
+    font-size: 24px;
+  }
+  .tech-container main {
+    padding: 15px !important;
+  }
+  .tech-table-container {
+    overflow-x: auto;
+  }
+  .mobile-toggle-btn {
+    display: block !important;
+  }
+}
+
+/* White Theme Popup & Table */
+.pco-popup.white-theme {
+  background: #ffffff !important;
+  color: #333333 !important;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.pco-popup-header.white-theme {
+  background: #ffffff !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 8px 12px !important;
+}
+
+.pco-popup-title.white-theme {
+  color: #0052cc !important;
+  font-weight: 900 !important;
+}
+
+.ports-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.ports-table th {
+  background: #f8f9fa;
+  padding: 4px 6px;
+  text-align: left;
+  font-size: 9px;
+  color: #666;
+  text-transform: uppercase;
+  border-bottom: 2px solid #eee;
+}
+
+.ports-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.badge-empty {
+  background: #f0f0f0;
+  color: #888;
+}
+
+.badge-active {
+  background: #e3fcef;
+  color: #006644;
+}
+
+.btn-add {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.btn-add:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.btn-terminate {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.btn-terminate:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.act-icon.del-global {
+  color: #ff5630;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.act-icon.del-global:hover {
+  opacity: 0.7;
+}
